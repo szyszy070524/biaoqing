@@ -71,3 +71,19 @@ test('generator select options have explicit contrast styles for native dropdown
   assert.match(css, /color:\s*#081118;/);
   assert.match(css, /background:\s*#f4f2eb;/);
 });
+
+test('footer uses a three-column grid with bottom alignment on desktop', () => {
+  const css = fs.readFileSync(
+    path.join(__dirname, '..', 'src', 'assets', 'styles.css'),
+    'utf8'
+  );
+
+  assert.match(
+    css,
+    /\.split-band,\s*[\s\S]*?\.footer-grid\s*\{[\s\S]*?grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\);/
+  );
+  assert.match(
+    css,
+    /\.footer-grid\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1\.4fr\)\s*minmax\(0,\s*1fr\)\s*minmax\(0,\s*1fr\);[\s\S]*?align-items:\s*end;/
+  );
+});
