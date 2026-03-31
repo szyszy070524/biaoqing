@@ -8,18 +8,23 @@ const {
 } = require('./src/site-builder');
 
 const root = __dirname;
-const distDir = path.join(root, 'dist');
 const siteUrl = process.env.SITE_URL || '';
+const rootFilesToCopy = ['google72c483de9cc4a51a.html'];
 
-buildSite();
+if (require.main === module) {
+  buildSite();
+}
 
-function buildSite() {
+function buildSite(options = {}) {
+  const distDir = options.distDir || path.join(root, 'dist');
+
   fs.mkdirSync(path.join(distDir, 'assets'), { recursive: true });
   fs.mkdirSync(path.join(distDir, 'tools'), { recursive: true });
 
   copyAsset('styles.css');
   copyAsset('site.js');
   copyRootAsset('logo.png');
+  rootFilesToCopy.forEach(copyRootFileToDistRoot);
 
   writeFile('index.html', buildHomePageHtml());
   writeFile(path.join('tools', 'index.html'), buildToolsIndexHtml());
@@ -30,24 +35,35 @@ function buildSite() {
 
   writeFile('robots.txt', buildRobots());
   writeFile('sitemap.xml', buildSitemap());
-}
 
-function copyAsset(fileName) {
-  const source = path.join(root, 'src', 'assets', fileName);
-  const target = path.join(distDir, 'assets', fileName);
-  fs.copyFileSync(source, target);
-}
+  function copyAsset(fileName) {
+    const source = path.join(root, 'src', 'assets', fileName);
+    const target = path.join(distDir, 'assets', fileName);
+    fs.copyFileSync(source, target);
+  }
 
-function copyRootAsset(fileName) {
-  const source = path.join(root, fileName);
-  const target = path.join(distDir, 'assets', fileName);
-  fs.copyFileSync(source, target);
-}
+  function copyRootAsset(fileName) {
+    const source = path.join(root, fileName);
+    const target = path.join(distDir, 'assets', fileName);
+    fs.copyFileSync(source, target);
+  }
 
-function writeFile(relativePath, contents) {
-  const target = path.join(distDir, relativePath);
-  fs.mkdirSync(path.dirname(target), { recursive: true });
-  fs.writeFileSync(target, contents);
+  function copyRootFileToDistRoot(fileName) {
+    const source = path.join(root, fileName);
+    const target = path.join(distDir, fileName);
+
+    if (!fs.existsSync(source)) {
+      return;
+    }
+
+    fs.copyFileSync(source, target);
+  }
+
+  function writeFile(relativePath, contents) {
+    const target = path.join(distDir, relativePath);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, contents);
+  }
 }
 
 function buildSitemap() {
@@ -72,3 +88,7 @@ function buildRobots() {
   const sitemapLine = siteUrl ? `Sitemap: ${siteUrl}/sitemap.xml\n` : '';
   return `User-agent: *\nAllow: /\n${sitemapLine}`;
 }
+
+module.exports = {
+  buildSite,
+};

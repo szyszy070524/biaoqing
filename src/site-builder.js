@@ -730,7 +730,7 @@ function buildToolPageHtml(toolItem) {
       </div>
     </section>
 
-    <script id="tool-data" type="application/json">${escapeHtml(toolJson)}</script>
+    <script id="tool-data" type="application/json">${serializeJsonForScript(toolJson)}</script>
   `;
 
   return layout({
@@ -975,6 +975,13 @@ function escapeHtml(value) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+function serializeJsonForScript(value) {
+  return String(value)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026');
 }
 
 function capitalize(value) {

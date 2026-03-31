@@ -232,6 +232,11 @@ h1 {
   border-radius: 14px;
 }
 
+.generator-form option {
+  color: #081118;
+  background: #f4f2eb;
+}
+
 button,
 .search-panel button,
 .tool-card a,

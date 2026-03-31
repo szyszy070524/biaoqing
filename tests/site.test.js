@@ -1,5 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const {
   SITE_NAME,
@@ -39,4 +41,33 @@ test('tool detail page includes seo metadata and copyable results', () => {
   assert.match(html, /Short Funny Captions/);
   assert.match(html, /Copy Caption/);
   assert.match(html, /Related Tools/);
+});
+
+test('tool detail page embeds parseable JSON data for the generator', () => {
+  const html = buildToolPageHtml(
+    tools.find((tool) => tool.slug === 'aesthetic-caption-generator')
+  );
+
+  const match = html.match(
+    /<script id="tool-data" type="application\/json">([\s\S]*?)<\/script>/
+  );
+
+  assert.ok(match, 'expected tool-data script tag');
+  assert.doesNotMatch(match[1], /&quot;/);
+
+  const data = JSON.parse(match[1]);
+  assert.equal(data.slug, 'aesthetic-caption-generator');
+  assert.ok(Array.isArray(data.captions));
+  assert.ok(data.captions.length > 0);
+});
+
+test('generator select options have explicit contrast styles for native dropdowns', () => {
+  const css = fs.readFileSync(
+    path.join(__dirname, '..', 'src', 'assets', 'styles.css'),
+    'utf8'
+  );
+
+  assert.match(css, /\.generator-form option\s*\{/);
+  assert.match(css, /color:\s*#081118;/);
+  assert.match(css, /background:\s*#f4f2eb;/);
 });
